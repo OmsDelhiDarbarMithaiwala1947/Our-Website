@@ -1,3 +1,9 @@
+> **This is site build 2026-08-21.**
+> Open any page and look at the very bottom of the footer — it prints `Site build 2026-08-21`.
+> If it says anything else, you are looking at an older copy: delete the old unzipped folder
+> first, then unzip this one fresh. The stylesheet and the price file are linked with a
+> `?v=2026-08-21` stamp, so your browser cannot serve you the previous version by mistake.
+
 # Om's Dehlii Darbar Mithaiwala — website
 
 A plain website. No accounts, no cart, no monthly software bill. Every "Order"
@@ -198,7 +204,7 @@ README.md           This file
   they are set large rather than buried.
 - **"\* Fancy Boxes Charges Extra"** appears under every box and hamper price, and
   travels inside the WhatsApp message too, so nobody is surprised at the counter.
-- **Google.** The site hands Google your address, hours, all three numbers and the
+- **Google.** The site hands Google your address, hours, both numbers and the
   4.8 rating in the format it prefers. Update your Google Business Profile so the
   two agree — see the corrections list supplied with this build.
 - **Speed.** The home page shows its main image in about 1.9 seconds on a

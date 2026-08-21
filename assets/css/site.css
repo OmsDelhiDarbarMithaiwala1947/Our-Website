@@ -532,3 +532,146 @@ p{margin:0 0 1em}
 .pimg .noimg img.nomed,.shot .noimg img.nomed,.disc .noimg img.nomed,.noimg img.nomed{
   width:50%;height:auto;max-height:58%;object-fit:contain;transform:none}
 .pcard:hover .noimg img.nomed{transform:none}
+
+
+/* ==========================================================================
+   V3 SKIN — the catalogue's premium dressing, applied over the system above.
+   Ivory paper, deep maroon, gold hairlines, Cormorant + Lato + Pinyon Script.
+   Everything below only re-points existing tokens, so the components,
+   layout and accessibility work above are untouched.
+   ========================================================================== */
+@font-face{font-family:'Corm';src:url(../fonts/corm-400.woff2) format('woff2');font-weight:400;font-display:swap;
+  unicode-range:U+0000-00FF,U+2000-206F}
+@font-face{font-family:'Corm';src:url(../fonts/corm-600.woff2) format('woff2');font-weight:600;font-display:swap;
+  unicode-range:U+0000-00FF,U+2000-206F}
+@font-face{font-family:'Corm';src:url(../fonts/corm-700.woff2) format('woff2');font-weight:700;font-display:swap;
+  unicode-range:U+0000-00FF,U+2000-206F}
+@font-face{font-family:'Corm';src:url(../fonts/corm-x700.woff2) format('woff2');font-weight:700;font-display:swap;
+  unicode-range:U+0100-02BA,U+1E00-1E9F,U+20A0-20C0,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'Lato';src:url(../fonts/lato-400.woff2) format('woff2');font-weight:400;font-display:swap;
+  unicode-range:U+0000-00FF,U+2000-206F}
+@font-face{font-family:'Lato';src:url(../fonts/lato-700.woff2) format('woff2');font-weight:700;font-display:swap;
+  unicode-range:U+0000-00FF,U+2000-206F}
+@font-face{font-family:'Lato';src:url(../fonts/lato-x700.woff2) format('woff2');font-weight:700;font-display:swap;
+  unicode-range:U+0100-02BA,U+1E00-1E9F,U+20A0-20C0,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'Script';src:url(../fonts/script-400.woff2) format('woff2');font-weight:400;font-display:swap;
+  unicode-range:U+0000-00FF,U+2000-206F}
+
+:root{
+  /* Contrast, measured against the ivory page #FBF5E9:
+       maroon  #5E1526  12.66:1      crimson #A8324A  5.62:1
+       goldink #8A6119   4.83:1      ink     #3B2A20 11.72:1   muted #6B5647 6.31:1
+     Cream #FFF8EC on maroon = 12.9:1, on crimson = 5.8:1. */
+  --crimson:#A8324A;
+  --crimson-d:#8C243A;
+  --maroon:#5E1526;
+  --maroon-2:#7A1B2E;
+  --cream:#FBF5E9;
+  --cream-2:#F6EDDB;
+  --gold:#B8892B;
+  --gold-ink:#8A6119;
+  --ink:#3B2A20;
+  --muted:#6B5647;
+  --line:rgba(94,21,38,.18);
+  --radius:4px;
+  --shadow:0 1px 2px rgba(59,42,32,.06),0 10px 26px rgba(59,42,32,.07);
+  /* the old accents are retired to ornament duty */
+  --teal:#5E1526; --olive:#8A6119; --olive2:#6B4A12; --orange:#A8324A; --purple:#5E1526;
+}
+body{font-family:'Lato',system-ui,sans-serif;background:var(--cream)}
+h1,h2,h3,.card h3,.pcard .pn,.hn,.bh{font-family:'Corm',Georgia,serif;letter-spacing:.005em}
+h1{font-weight:600}
+h2,h3{font-weight:700}
+.eyebrow,.kick,.rowhead span,.tb b,.viewall,.chip,.padd,.filters button,.announce{
+  font-family:'Lato',sans-serif;letter-spacing:.06em}
+.ppr,.hp,.rate,.price,.pcard .ppr{font-family:'Corm',Georgia,serif;font-weight:700;letter-spacing:0}
+.deva,.dv,.pdv{font-family:'Mukta',sans-serif}
+
+/* the wordmark lockup, same as the catalogue cover */
+.wm{display:block;text-align:center;color:var(--maroon);text-decoration:none;line-height:1}
+.wm .crown{display:block;margin:0 auto 4px;width:34px;height:12px}
+.wm .oms{font-family:'Corm',serif;font-weight:700;font-size:12px;letter-spacing:.18em}
+.wm .nm{font-family:'Corm',serif;font-weight:700;font-size:23px;line-height:1.06;letter-spacing:.015em;
+  white-space:nowrap;margin-top:1px}
+.wm .tg{font-family:'Script',cursive;font-size:16px;color:var(--crimson);margin-top:2px}
+.wm .sn{font-family:'Lato',sans-serif;font-weight:700;font-size:8.5px;letter-spacing:.3em;
+  color:var(--gold-ink);margin-top:4px}
+@media(max-width:600px){.wm .nm{font-size:19px}.wm .tg{font-size:14px}}
+
+/* cards and panels pick up the gold hairline */
+.card,.pcard,.hc,.tb,.panel,.bandc,.promo,.trustbar,.cat .disc{
+  border-radius:4px!important;border-color:rgba(184,137,43,.42)!important}
+.pcard,.card{background:#FFFBF3;border:1px solid rgba(184,137,43,.42)}
+.banner .bin{background:linear-gradient(90deg,rgba(94,21,38,.90),rgba(94,21,38,.55) 62%,rgba(94,21,38,0))}
+.announce{background:var(--maroon);color:#F3DFC0}
+.season{background:var(--cream-2);border-bottom:1px solid rgba(184,137,43,.42)}
+.ribbonflag{background:var(--maroon)}
+.trustbar{background:var(--cream-2)}
+footer,.sitefoot{background:var(--maroon);color:#F3DFC0}
+.noimg{background:var(--cream-2) url(../img/lattice.svg) repeat;background-size:34px 34px}
+.goldrule{height:5px;background:linear-gradient(90deg,var(--gold) 0%,#E4CD98 18%,var(--gold) 38%,
+  #E4CD98 60%,var(--gold) 82%,#E4CD98 100%)}
+.hdr{background:var(--cream);border-bottom:1px solid rgba(184,137,43,.42)}
+.hdr .brand.wm{display:block;padding:10px 0}
+.hdr .brand.wm img.crown{filter:none}
+
+/* --- header lockup: the old .brand was a flex row; the wordmark stacks --- */
+.hdr .brand.wm{display:block!important;text-align:left;padding:12px 0;gap:0}
+.hdr .brand.wm>*{display:block}
+.hdr .brand.wm img.crown{margin:0 0 3px}
+.hdr .brand.wm .nm{font-size:21px}
+.hdr .since{display:none}
+.hdr .nav ul{font-size:14.5px}
+.hdr .nav a{padding:9px 11px}
+@media(max-width:900px){.hdr .brand.wm .nm{font-size:18px}}
+
+/* --- hero: let the photograph through --- */
+.banner .bin{background:linear-gradient(90deg,rgba(94,21,38,.88) 0%,rgba(94,21,38,.72) 38%,
+  rgba(94,21,38,.30) 72%,rgba(94,21,38,.12) 100%)}
+.banner .bimg img{filter:saturate(1.05)}
+/* uniform scrim — the headline is centred, so a directional gradient cannot
+   guarantee contrast across its whole width */
+.banner .bin{background:linear-gradient(180deg,rgba(94,21,38,.90) 0%,rgba(94,21,38,.78) 55%,
+  rgba(94,21,38,.88) 100%)}
+.season{color:var(--ink)}
+.season a{color:var(--maroon);font-weight:700}
+
+/* --- header: the shop's own cartouche, as printed on the box --- */
+.hdr .brand{display:flex!important;align-items:center;gap:14px;padding:10px 0;text-decoration:none}
+.hdr .brand img{width:132px;height:auto;display:block}
+.hdr .since{display:inline-block!important;font-family:'Corm',Georgia,serif;font-weight:600;font-size:14px;
+  letter-spacing:.14em;color:var(--maroon);white-space:nowrap;text-transform:none}
+.hdr .since b{font-weight:700;font-size:19px;letter-spacing:.04em}
+@media(max-width:600px){.hdr .brand img{width:104px}.hdr .since{font-size:12px}.hdr .since b{font-size:16px}}
+/* the season-banner dismiss button was white on ivory */
+.season .x{color:var(--maroon)!important;opacity:.75}
+.season .x:hover{opacity:1}
+/* darkest where the type sits, opening up at the edges so the tray still reads */
+.banner .bin{background:radial-gradient(125% 95% at 50% 48%,rgba(94,21,38,.93) 0%,
+  rgba(94,21,38,.88) 46%,rgba(94,21,38,.52) 100%)}
+
+/* ₹ (U+20B9) is absent from Cormorant and from Lato's latin subset. Mukta's
+   Devanagari file carries it, so it is aliased into both families for that one
+   codepoint — otherwise the rupee sign silently borrows whatever the OS has. */
+@font-face{font-family:'Corm';src:url(../fonts/mukta-dev-600.woff2) format('woff2');font-weight:400;
+  font-display:swap;unicode-range:U+20B9}
+@font-face{font-family:'Corm';src:url(../fonts/mukta-dev-600.woff2) format('woff2');font-weight:700;
+  font-display:swap;unicode-range:U+20B9}
+@font-face{font-family:'Lato';src:url(../fonts/mukta-dev-600.woff2) format('woff2');font-weight:400;
+  font-display:swap;unicode-range:U+20B9}
+@font-face{font-family:'Lato';src:url(../fonts/mukta-dev-600.woff2) format('woff2');font-weight:700;
+  font-display:swap;unicode-range:U+20B9}
+/* retire the old faces everywhere the skin is in charge */
+.per,.ppr span,.pfoot span,.meta,.chip,.tb span,.hw,.bhi,.rowhead b,.card .desc,.pcard .pbd,
+.announce,.season,.filters button,.nav a,.padd,.btn,button,input,select,textarea,p,li,td,th,small,figcaption{
+  font-family:'Lato',system-ui,sans-serif}
+.rate,.ppr,.hp,.price,.bp,.hn,h1,h2,h3,h4,.card h3,.pcard .pn{font-family:'Corm',Georgia,serif}
+.pcard .ppr small,.ppr small{font-family:'Lato',system-ui,sans-serif;letter-spacing:.08em}
+/* Cormorant defaults to old-style figures; a price wants lining numerals */
+.ppr,.rate,.price,.hp,.bp,.pricetag,.ladder b,.hn,.tb b,.rr b{
+  font-variant-numeric:lining-nums tabular-nums;font-feature-settings:'lnum' 1,'tnum' 1}
+/* footer contact links: 44px hit area without opening up the fine-print line
+   (negative margin cancels the padding visually, the target stays full size) */
+.ftr .fine a,.visit-contact a{display:inline-block;padding:14px 8px;margin:-14px 0;border-radius:4px}
+.ftr .fine a:focus-visible,.visit-contact a:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.ftr .build{opacity:.62;font-size:12px;white-space:nowrap}

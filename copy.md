@@ -432,8 +432,8 @@ Please call for sampling.
 | Logo lockup | OM'S / DEHLII DARBAR / MITHAIWALA · *Mithai n More* |
 | Right of the logo, always | SINCE 1947 |
 | Address | Shop No. 20, Shivaji Nagar, Delisle Road, Lower Parel (E), Mumbai — 400 013 |
-| Phones | 9920879952 · 9820260299 · 8356011856 |
-| Foot, condensed | 98202 60299 \| 83560 11856 |
+| Phones | 9920879952 · 9820260299 |
+| Foot, condensed | 99208 79952 \| 98202 60299 |
 | Section banner (verbatim) | ASSORTED SWEETS & DRYFRUITS IN FANCY BOX & GIFT PACKS |
 | Hamper callout (verbatim) | dry fruits presentation in fancy gift boxes |
 | Festival line | Rakshabandhan · 28 August 2026 |

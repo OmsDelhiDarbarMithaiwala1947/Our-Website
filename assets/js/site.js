@@ -50,7 +50,10 @@
     if (!slug) {
       /* No photograph for this sweet yet. Rather than a hole in the grid we set the
          shop's own mandala on cream. Add a photo in products.js and it replaces this. */
-      return '<div class="noimg"><img class="nomed" src="assets/img/medallion.svg" alt="" ' +
+      /* two medallion designs, alternating, so a grid of them does not tile flat */
+      imgSeen++;
+      var med = (imgSeen % 2) ? 'medallion-b' : 'medallion';
+      return '<div class="noimg"><img class="nomed" src="assets/img/' + med + '.svg" alt="" ' +
              'aria-hidden="true" width="96" height="96" loading="lazy" decoding="async">' +
              (label ? '<span class="nodev">' + esc(label) + '</span>' : '') + '</div>';
     }
@@ -256,9 +259,13 @@
       a.href = waLink(a.dataset.waItem || 'a Fancy Rakhi Gift Hamper', a.dataset.waExtra || '');
     });
     $$('[data-ph]').forEach(function (el) {
-      var v = SHOP[el.dataset.ph];
-      if (isTBC(v)) { el.innerHTML = '<span class="ph-note">' + esc(v) + '</span>'; }
-      else { el.textContent = v; }
+      var k = el.dataset.ph, v = SHOP[k];
+      if (isTBC(v)) { el.innerHTML = '<span class="ph-note">' + esc(v) + '</span>'; return; }
+      if (k === 'email') {
+        el.innerHTML = '<a href="mailto:' + esc(v) + '">' + esc(v) + '</a>';
+      } else if (k === 'instagram') {
+        el.innerHTML = '<a href="' + esc(v) + '" rel="noopener" target="_blank">@omsddm</a>';
+      } else { el.textContent = v; }
     });
   }
 
