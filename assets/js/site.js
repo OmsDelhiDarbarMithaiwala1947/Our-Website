@@ -90,6 +90,7 @@
         sub.replace('[[verify]]', '<span class="ph-note">[[verify]]</span>') + '</small></div>' +
         '<a class="padd" href="' + attr(productWa(p)) + '" rel="noopener" aria-label="Order ' + esc(p.name) +
         ' on WhatsApp">' + ICON.wa + 'Order</a></div>' +
+      buyRow(p) +
     '</article>';
   }
 
@@ -202,13 +203,32 @@
   }
   function renderCats() {
     var host = $('#cattiles'); if (!host) { return; }
+    /* notes are computed from the price file, so a rate change can never leave
+       a stale "from ..." label behind on a tile */
+    function low(cat) {
+      var xs = PRODUCTS.filter(function (p) { return p.category === cat && p.pricePerKg != null; });
+      if (!xs.length) { return ''; }
+      var kg = xs.filter(function (p) { return p.unit === 'kg'; });
+      var pc = xs.filter(function (p) { return p.unit === 'piece'; });
+      if (kg.length) {
+        return 'from ' + inr(Math.min.apply(null, kg.map(function (p) { return p.pricePerKg; }))) + '/kg';
+      }
+      return 'from ' + inr(Math.min.apply(null, pc.map(function (p) { return p.pricePerKg; }))) + ' a piece';
+    }
+    function shot(cat) {
+      var x = PRODUCTS.filter(function (p) { return p.category === cat && p.photo; })[0];
+      return x ? x.photo : null;
+    }
+    var bandLow = inr(Math.min.apply(null, BANDS.map(function (b) { return b.pricePerKg; })));
+    var hampLow = inr(Math.min.apply(null, HAMPERS.map(function (h) { return h.price; })));
+    var hampHi  = inr(Math.max.apply(null, HAMPERS.map(function (h) { return h.price; })));
     host.innerHTML = [
-      { label:'Assortment Boxes', note:'from ₹280/kg', href:'assortments.html', photo:'assorted-tray' },
-      { label:'Dry Fruit Sweets', note:'from ₹1,000/kg', href:'sweets.html', photo:'tarbuj' },
-      { label:'Milk & Mawa',      note:'from ₹560/kg', href:'sweets.html', photo:'tiranga-barfi' },
-      { label:'Milk & Mawa Peda', note:'from ₹500/kg', href:'sweets.html', photo:'assorted-varq' },
-      { label:'Gift Hampers',     note:'₹1,400–₹3,000', href:'boxes.html', photo:'assorted-hamper' },
-      { label:'Bengali Sweets',   note:'₹40 a piece',  href:'sweets.html', photo:'chandrakala' }
+      { label:'Assortment Boxes', note:'from ' + bandLow + '/kg', href:'assortments.html', photo:shot('dryfruit') },
+      { label:'Dry Fruit Sweets', note:low('dryfruit'),  href:'sweets.html', photo:shot('dryfruit') },
+      { label:'Milk & Mawa',      note:low('milk-mawa'), href:'sweets.html', photo:shot('milk-mawa') },
+      { label:'Milk & Mawa Peda', note:low('peda'),      href:'sweets.html', photo:shot('peda') },
+      { label:'Gift Hampers',     note:hampLow + '–' + hampHi, href:'boxes.html', photo:shot('chocolate') },
+      { label:'Bengali Sweets',   note:low('bengali'),   href:'sweets.html', photo:shot('bengali') }
     ].map(catTile).join('');
   }
 
@@ -221,11 +241,11 @@
 
   function renderBest() {
     var host = $('#bestsellers'); if (!host) { return; }
-    var order = ['sutarfeni', 'tarbuj', 'kaju-katri', 'anarkali',
-                 'tiranga-barfi', 'kaju-pista-roll', 'anjeer-katri', 'malai-chap'];
-    host.innerHTML = order.map(function (id) {
-      return PRODUCTS.filter(function (p) { return p.id === id; })[0];
-    }).filter(Boolean).map(pcard).join('');
+    /* Signature sweets lead, in menu order; everything else follows behind them. */
+    var sig  = PRODUCTS.filter(function (p) { return p.flag === 'Signature'; });
+    var rest = PRODUCTS.filter(function (p) { return p.flag !== 'Signature'; });
+    host.innerHTML = sig.concat(rest).map(pcard).join('');
+    host.setAttribute('data-stagger', '');
   }
   function renderFaq() {
     var host = $('#faq'); if (!host) { return; }
@@ -267,6 +287,257 @@
         el.innerHTML = '<a href="' + esc(v) + '" rel="noopener" target="_blank">@omsddm</a>';
       } else { el.textContent = v; }
     });
+  }
+
+
+
+  /* the add-to-basket row under each card: weight, quantity, add */
+  function buyRow(p) {
+    if (p.pricePerKg == null) { return ''; }
+    var opts = (p.weightOptions && p.weightOptions.length ? p.weightOptions : ['1 kg'])
+      .map(function (w, i) {
+        return '<option value="' + esc(w) + '"' + (i === 1 || p.unit === 'piece' ? ' selected' : '') + '>' +
+               esc(w) + '</option>';
+      }).join('');
+    var id = 'w-' + p.id;
+    return '<div class="buy">' +
+      '<label class="sr" for="' + id + '">Weight for ' + esc(p.name) + '</label>' +
+      '<select class="wsel" id="' + id + '" data-buy-w>' + opts + '</select>' +
+      '<div class="qsel"><button type="button" data-buy-less aria-label="One less">−</button>' +
+        '<input type="text" inputmode="numeric" value="1" size="2" data-buy-q ' +
+          'aria-label="Quantity of ' + esc(p.name) + '">' +
+        '<button type="button" data-buy-more aria-label="One more">+</button></div>' +
+      '<button type="button" class="pbuy" data-buy-add="' + esc(p.id) + '">Add</button>' +
+    '</div>';
+  }
+
+  /* one delegated listener covers every grid on the page, now and later */
+  function buyWire() {
+    document.addEventListener('click', function (e) {
+      var row = e.target.closest('.buy'); if (!row) { return; }
+      var q = row.querySelector('[data-buy-q]');
+      var n = Math.max(1, Math.min(99, parseInt(q.value, 10) || 1));
+      if (e.target.closest('[data-buy-less]')) { q.value = Math.max(1, n - 1); return; }
+      if (e.target.closest('[data-buy-more]')) { q.value = Math.min(99, n + 1); return; }
+      var add = e.target.closest('[data-buy-add]');
+      if (add) {
+        q.value = n;
+        cartAdd(add.dataset.buyAdd, row.querySelector('[data-buy-w]').value, n);
+        add.textContent = 'Added';
+        setTimeout(function () { add.textContent = 'Add'; }, 1100);
+      }
+    });
+    document.addEventListener('input', function (e) {
+      if (e.target.matches('[data-buy-q]')) {
+        e.target.value = e.target.value.replace(/\D/g, '').slice(0, 2);
+      }
+    });
+  }
+
+  /* ══════════════════════════════════════════════════════════════════════════
+     CART
+
+     A real cart, not a decorative one. It holds lines in memory, mirrors them
+     into localStorage so the basket survives moving between pages, and checks
+     out by opening WhatsApp with the customer's name, number, delivery area
+     and every line written out. No card is taken here and no payment is
+     claimed — the shop confirms the final rate on WhatsApp, because fancy box
+     charges and delivery are settled per order.
+     ══════════════════════════════════════════════════════════════════════════ */
+  var CART_KEY = 'oddm-cart-v1';
+  var cart = [];
+
+  function cartLoad() {
+    try {
+      var raw = window.localStorage.getItem(CART_KEY);
+      cart = raw ? JSON.parse(raw) : [];
+      if (!Array.isArray(cart)) { cart = []; }
+    } catch (e) { cart = []; }        /* private mode, blocked storage — memory only */
+  }
+  function cartSave() {
+    try { window.localStorage.setItem(CART_KEY, JSON.stringify(cart)); } catch (e) {}
+  }
+
+  var GRAMS = {'250 gms': 250, '500 gms': 500, '1 kg': 1000};
+
+  /* what one line costs: per-kg items scale by weight, per-piece items by count */
+  function linePrice(l) {
+    var p = byId(l.id);
+    if (!p || p.pricePerKg == null) { return null; }
+    if (p.unit === 'piece') { return p.pricePerKg * l.qty; }
+    var g = GRAMS[l.weight] || 1000;
+    return Math.round(p.pricePerKg * (g / 1000)) * l.qty;
+  }
+  function byId(id) {
+    for (var i = 0; i < PRODUCTS.length; i++) { if (PRODUCTS[i].id === id) { return PRODUCTS[i]; } }
+    var pools = [BOXES, HAMPERS, BANDS];
+    for (var j = 0; j < pools.length; j++) {
+      for (var k = 0; k < pools[j].length; k++) {
+        var x = pools[j][k];
+        if ((x.id || slugify(x.name)) === id) {
+          return {id: id, name: x.name, nameHi: x.nameHi || '', unit: 'item',
+                  pricePerKg: x.price != null ? x.price : x.pricePerKg, photo: null};
+        }
+      }
+    }
+    return null;
+  }
+  function slugify(n) {
+    return String(n).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  }
+  function cartCount() {
+    return cart.reduce(function (n, l) { return n + l.qty; }, 0);
+  }
+  function cartTotal() {
+    var t = 0, exact = true;
+    cart.forEach(function (l) {
+      var v = linePrice(l);
+      if (v == null) { exact = false; } else { t += v; }
+    });
+    return {total: t, exact: exact};
+  }
+
+  function cartAdd(id, weight, qty) {
+    var found = null;
+    cart.forEach(function (l) { if (l.id === id && l.weight === weight) { found = l; } });
+    if (found) { found.qty += qty; } else { cart.push({id: id, weight: weight, qty: qty}); }
+    cartSave(); cartPaint(); cartFlash();
+  }
+  function cartSet(i, qty) {
+    if (qty <= 0) { cart.splice(i, 1); } else { cart[i].qty = qty; }
+    cartSave(); cartPaint();
+  }
+
+  /* ── drawer ─────────────────────────────────────────────────────────────── */
+  function cartMount() {
+    if ($('#cart-drawer')) { return; }
+    var btn = document.createElement('button');
+    btn.className = 'cartbtn'; btn.id = 'cart-open'; btn.type = 'button';
+    btn.setAttribute('aria-label', 'Open your basket');
+    btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" ' +
+      'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h16l-1.6 11.2A2 2 0 0 1 ' +
+      '16.4 19H7.6a2 2 0 0 1-2-1.8L4 6z"/><path d="M9 6V4.6A2.6 2.6 0 0 1 15 4.6V6"/></svg>' +
+      '<span class="cartn" id="cart-n">0</span>';
+    document.body.appendChild(btn);
+
+    var wrap = document.createElement('div');
+    wrap.id = 'cart-drawer'; wrap.className = 'cartwrap'; wrap.setAttribute('aria-hidden', 'true');
+    wrap.innerHTML =
+      '<div class="cartveil" data-cart-close></div>' +
+      '<aside class="cartpanel" role="dialog" aria-modal="true" aria-label="Your basket">' +
+        '<header class="carthd"><h2>Your basket</h2>' +
+          '<button class="cartx" type="button" data-cart-close aria-label="Close basket">&times;</button></header>' +
+        '<div class="cartbody" id="cart-lines"></div>' +
+        '<div class="cartsum" id="cart-sum"></div>' +
+        '<form class="cartform" id="cart-form" novalidate>' +
+          '<label>Your name<input name="nm" autocomplete="name" required></label>' +
+          '<label>Phone number<input name="ph" inputmode="tel" autocomplete="tel" required></label>' +
+          '<label>Delivery area or address<textarea name="ad" rows="2" autocomplete="street-address" required></textarea></label>' +
+          '<p class="carterr" id="cart-err" role="alert" hidden></p>' +
+          '<button class="cartgo" type="submit">' + ICON.wa + 'Place order on WhatsApp</button>' +
+          '<p class="cartfine">Nothing is charged here. The shop confirms your final rate, ' +
+            'fancy box charges and delivery on WhatsApp before you pay.</p>' +
+        '</form>' +
+      '</aside>';
+    document.body.appendChild(wrap);
+
+    btn.addEventListener('click', function () { cartOpen(true); });
+    wrap.addEventListener('click', function (e) {
+      if (e.target.hasAttribute('data-cart-close')) { cartOpen(false); }
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && wrap.classList.contains('on')) { cartOpen(false); }
+    });
+    $('#cart-form').addEventListener('submit', cartCheckout);
+    $('#cart-lines').addEventListener('click', function (e) {
+      var b = e.target.closest('[data-ci]'); if (!b) { return; }
+      var i = +b.dataset.ci;
+      if (b.dataset.act === 'less') { cartSet(i, cart[i].qty - 1); }
+      if (b.dataset.act === 'more') { cartSet(i, cart[i].qty + 1); }
+      if (b.dataset.act === 'del')  { cartSet(i, 0); }
+    });
+    cartPaint();
+  }
+
+  var lastFocus = null;
+  function cartOpen(on) {
+    var wrap = $('#cart-drawer'); if (!wrap) { return; }
+    wrap.classList.toggle('on', on);
+    wrap.setAttribute('aria-hidden', on ? 'false' : 'true');
+    document.documentElement.style.overflow = on ? 'hidden' : '';
+    if (on) { lastFocus = document.activeElement; var f = $('#cart-drawer .cartx'); if (f) { f.focus(); } }
+    else if (lastFocus) { lastFocus.focus(); }
+  }
+  function cartFlash() {
+    var b = $('#cart-open'); if (!b) { return; }
+    b.classList.remove('pop'); void b.offsetWidth; b.classList.add('pop');
+  }
+
+  function cartPaint() {
+    var n = $('#cart-n'); if (n) { n.textContent = cartCount(); n.classList.toggle('zero', !cartCount()); }
+    var host = $('#cart-lines'); if (!host) { return; }
+    if (!cart.length) {
+      host.innerHTML = '<p class="cartempty">Your basket is empty. Add a sweet and it will show up here.</p>';
+      $('#cart-sum').innerHTML = '';
+      $('#cart-form').hidden = true;
+      return;
+    }
+    $('#cart-form').hidden = false;
+    host.innerHTML = cart.map(function (l, i) {
+      var p = byId(l.id) || {name: l.id, nameHi: '', photo: null};
+      var v = linePrice(l);
+      return '<div class="cartline">' +
+        '<div class="cartpic">' + (p.photo
+          ? '<img src="assets/img/' + p.photo + '-400.jpg" alt="" width="64" height="64" loading="lazy">'
+          : '<img src="assets/img/medallion.svg" alt="" width="64" height="64" loading="lazy">') + '</div>' +
+        '<div class="cartinfo"><b>' + esc(p.name) + '</b>' +
+          '<span>' + esc(l.weight) + '</span>' +
+          '<div class="qty">' +
+            '<button type="button" data-ci="' + i + '" data-act="less" aria-label="One less">−</button>' +
+            '<span aria-live="polite">' + l.qty + '</span>' +
+            '<button type="button" data-ci="' + i + '" data-act="more" aria-label="One more">+</button>' +
+            '<button type="button" class="cartdel" data-ci="' + i + '" data-act="del" ' +
+              'aria-label="Remove ' + esc(p.name) + '">Remove</button>' +
+          '</div></div>' +
+        '<div class="cartamt">' + (v == null ? '<span class="ph-note">ask</span>' : inr(v)) + '</div>' +
+      '</div>';
+    }).join('');
+    var t = cartTotal();
+    $('#cart-sum').innerHTML =
+      '<div class="cartrow"><span>' + cartCount() + ' item' + (cartCount() === 1 ? '' : 's') + '</span>' +
+      '<b>' + inr(t.total) + (t.exact ? '' : ' +') + '</b></div>' +
+      '<p class="cartnote">Estimate only. Fancy box charges are extra and delivery is confirmed separately.</p>';
+  }
+
+  function cartCheckout(e) {
+    e.preventDefault();
+    var f = e.target, err = $('#cart-err');
+    var nm = f.nm.value.trim(), ph = f.ph.value.trim(), ad = f.ad.value.trim();
+    var digits = ph.replace(/\D/g, '');
+    if (!nm || digits.length < 10 || !ad) {
+      err.hidden = false;
+      err.textContent = !nm ? 'Please add your name.'
+        : digits.length < 10 ? 'Please enter a phone number of at least 10 digits.'
+        : 'Please tell us where it is going.';
+      return;
+    }
+    err.hidden = true;
+    var t = cartTotal();
+    var lines = cart.map(function (l, i) {
+      var p = byId(l.id) || {name: l.id};
+      var v = linePrice(l);
+      return (i + 1) + '. ' + p.name + ' — ' + l.weight + ' x ' + l.qty +
+             (v == null ? ' (rate to confirm)' : ' = ' + '₹' + v.toLocaleString('en-IN'));
+    }).join('\n');
+    var msg =
+      "Hello Om's Dehlii Darbar! I would like to place an order.\n\n" +
+      'Name: ' + nm + '\n' +
+      'Phone: ' + ph + '\n' +
+      'Delivery area: ' + ad + '\n\n' +
+      'Order:\n' + lines + '\n\n' +
+      'Estimated total: ₹' + t.total.toLocaleString('en-IN') + (t.exact ? '' : ' plus the items marked to confirm') +
+      '\nI understand fancy box charges are extra and the final rate will be confirmed.';
+    window.open('https://wa.me/' + SHOP.whatsapp + '?text=' + encodeURIComponent(msg), '_blank', 'noopener');
   }
 
   /* ── SEASON BANNER + COUNTDOWN ──────────────────────────────────────────── */
@@ -361,12 +632,81 @@
   function init() {
     nav(); fillShop(); season();
     renderCats(); renderBands(); renderHampers(); renderBoxes(); renderBest();
-    renderRow('#row-dryfruit', ['kesar-katri','anjeer-sugarfree','pakeeza-dryfruit','khajur-sugarfree']);
+    renderRow('#row-dryfruit', ['kesar-katri','anjeer-sugarfree','dry-fruit-sandwich','khajur-sugarfree']);
     renderCatalogue(); renderFaq();
     corporateForm(); productSchema();
+    cartLoad(); cartMount(); buyWire();
+    motion();
   }
   var booted = false;
   function boot() { if (booted) { return; } booted = true; init(); }
   if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', boot); }
   else { boot(); }   /* deferred scripts land here: DOM is parsed, nothing painted yet */
+
+  /* ── MOTION ───────────────────────────────────────────────────────────────
+     Scroll reveals, a scroll-progress bar and a back-to-top button.
+     All of it is decorative. If the viewer has asked for reduced motion we
+     mark everything visible at once and wire none of it up.               */
+  function motion() {
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    /* which blocks reveal, and how */
+    [['.sec > .wrap > *', 'up'], ['.pgrid', 'rise'], ['.cats', 'up'], ['[data-bands]', 'up'],
+     ['[data-hampers]', 'up'], ['[data-boxes]', 'up'], ['.trustbar', 'zoom'], ['.promo', 'up'],
+     ['.rowhead', 'left'], ['.ladder', 'right'], ['#catalogue', 'up'], ['.fresh', 'up']
+    ].forEach(function (pair) {
+      $$(pair[0]).forEach(function (el) {
+        if (!el.hasAttribute('data-reveal')) { el.setAttribute('data-reveal', pair[1]); }
+      });
+    });
+    $$('.pgrid, .cats, .trustbar, [data-hampers], [data-boxes]').forEach(function (el) {
+      el.setAttribute('data-stagger', '');
+    });
+
+    var targets = $$('[data-reveal], [data-stagger]');
+    if (reduce || !('IntersectionObserver' in window)) {
+      targets.forEach(function (el) { el.classList.add('in'); });
+      var b0 = $('.banner'); if (b0) { b0.classList.add('ready'); }
+      return;
+    }
+
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+      });
+    }, {rootMargin: '0px 0px -8% 0px', threshold: 0.06});
+    targets.forEach(function (el) { io.observe(el); });
+
+    /* anything rendered by JS after this point still needs observing */
+    window.__reveal = function (el) {
+      if (!el) { return; }
+      if (reduce) { el.classList.add('in'); return; }
+      io.observe(el);
+    };
+
+    var banner = $('.banner');
+    if (banner) { requestAnimationFrame(function () { banner.classList.add('ready'); }); }
+
+    /* scroll progress + back to top */
+    var bar = document.createElement('div'); bar.className = 'progress'; document.body.appendChild(bar);
+    var top = document.createElement('button');
+    top.className = 'totop'; top.type = 'button'; top.setAttribute('aria-label', 'Back to top');
+    top.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" ' +
+      'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5"/>' +
+      '<path d="M5 12l7-7 7 7"/></svg>';
+    top.addEventListener('click', function () { window.scrollTo({top: 0, behavior: 'smooth'}); });
+    document.body.appendChild(top);
+
+    var ticking = false;
+    window.addEventListener('scroll', function () {
+      if (ticking) { return; }
+      ticking = true;
+      requestAnimationFrame(function () {
+        var h = document.documentElement.scrollHeight - window.innerHeight;
+        bar.style.width = (h > 0 ? (window.scrollY / h) * 100 : 0) + '%';
+        top.classList.toggle('on', window.scrollY > 700);
+        ticking = false;
+      });
+    }, {passive: true});
+  }
 })();

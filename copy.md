@@ -15,7 +15,6 @@ Sugarfree" and "Anjeer Sugarfree" are used only as the product names the menu pr
 
 **Spellings preserved exactly as printed:** Dehlii · Katri · Burfi *and* Barfi (the
 menu uses both — each is kept as printed) · Maysore Pak · Mahim Halwa · Kalingar ·
-Tarbuj · Pakeeza · Deshi · Dryfruit.
 
 ---
 
@@ -259,7 +258,6 @@ One line each, explaining who each price point is actually for.
 | Anjeer Katri | अंजीर कतरी | 1,400 | Figs pressed with cashew and cut in diamonds — chewy, seeded, and very dark. |
 | Dry Fruit Sandwich | ड्राई फ्रूट सैंडविच | 1,400 | Two dry-fruit layers with a contrasting one between, cut square to show all three. |
 | Anarkali | अनारकली | 1,400 | Petal-folded dry-fruit sweet, silver-lined, with a glacé cherry set at the centre. |
-| Pakeeza Dryfruit | पकीज़ा ड्राई फ्रूट | 1,400 | Cashew, pistachio and almond layered fine and cut small. One of the prettiest on the tray. |
 | Tarbuj | तरबूज | 1,400 | Cut like a watermelon slice — green rind, red centre, whole almond slivers for seeds. |
 | Anjeer Sugarfree | अंजीर शुगरफ़्री | 1,600 | Figs and nuts alone, pressed and sliced. Nothing sweetens it but the fruit. |
 
