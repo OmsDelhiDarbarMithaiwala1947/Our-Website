@@ -270,6 +270,7 @@ p{margin:0 0 1em}
    moment the list is rendered, and by then the real content is always taller,
    so nothing ever jumps back up. */
 #catalogue:empty{min-height:100vh}
+#catalogue{opacity:1!important;transform:none!important;visibility:visible!important}
 #bestsellers:empty{min-height:76vh}
 [data-bands]:empty{min-height:88vh}
 [data-hampers]:empty,[data-boxes]:empty{min-height:62vh}

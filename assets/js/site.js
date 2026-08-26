@@ -69,6 +69,13 @@
       '</picture>';
   }
 
+  function hasCategory(p, cat) {
+    if (!cat || cat === 'all') { return true; }
+    if (p.categories && p.categories.indexOf(cat) !== -1) { return true; }
+    if (Array.isArray(p.category)) { return p.category.indexOf(cat) !== -1; }
+    return p.category === cat;
+  }
+
   /* ── STOREFRONT PRODUCT CARD (square photo, weight, price, order) ──────── */
   function pcard(p) {
     var wt = p.unit === 'piece' ? 'Sold by the piece'
@@ -82,7 +89,8 @@
     }
     var flag = p.flag ? '<span class="ribbonflag' + (p.flag === 'Signature' ? ' hot' : '') + '">' +
                esc(p.flag) + '</span>' : '';
-    return '<article class="pcard" data-cat="' + p.category + '">' + flag +
+    var catStr = p.categories ? p.categories.join(' ') : p.category;
+    return '<article class="pcard" data-cat="' + esc(catStr) + '">' + flag +
       '<div class="pimg">' + picture(p.photo, p.name + ' — ' + p.desc, '(min-width:900px) 260px, 46vw', p.nameHi) + '</div>' +
       '<div class="pbd"><h3>' + esc(p.name) + '</h3>' +
         '<div class="deva">' + esc(p.nameHi) + '</div>' +
@@ -122,7 +130,8 @@
               '<span class="u">' + (p.unit === 'piece' ? 'per piece' + (p.verify ? ' · [[verify]]' : '') : 'per kg') + '</span></div>';
       if (p.verify) { price = price.replace('[[verify]]', '<span class="ph-note">[[verify]]</span>'); }
     }
-    return '<article class="card" data-cat="' + p.category + '">' +
+    var catStr = p.categories ? p.categories.join(' ') : p.category;
+    return '<article class="card" data-cat="' + esc(catStr) + '">' +
       '<div class="ph">' + (p.flag ? '<span class="flag">' + esc(p.flag) + '</span>' : '') +
         picture(p.photo, p.name + ' — ' + p.desc, null, p.nameHi) + '</div>' +
       '<div class="bd"><h3>' + esc(p.name) + '</h3>' +
@@ -180,7 +189,7 @@
       });
     }
     function draw(cat) {
-      var list = (!cat || cat === 'all') ? live : live.filter(function (p) { return p.category === cat; });
+      var list = (!cat || cat === 'all') ? live : live.filter(function (p) { return hasCategory(p, cat); });
       host.innerHTML = list.map(pcard).join('');
       if (countEl) {
         var label = (CATEGORIES.filter(function (c) { return c.id === cat; })[0] || {}).label;
@@ -207,7 +216,7 @@
     /* notes are computed from the price file, so a rate change can never leave
        a stale "from ..." label behind on a tile */
     function low(cat) {
-      var xs = PRODUCTS.filter(function (p) { return p.category === cat && p.pricePerKg != null; });
+      var xs = PRODUCTS.filter(function (p) { return hasCategory(p, cat) && p.pricePerKg != null; });
       if (!xs.length) { return ''; }
       var kg = xs.filter(function (p) { return p.unit === 'kg'; });
       var pc = xs.filter(function (p) { return p.unit === 'piece'; });
@@ -217,14 +226,14 @@
       return 'from ' + inr(Math.min.apply(null, pc.map(function (p) { return p.pricePerKg; }))) + ' a piece';
     }
     function shot(cat) {
-      var x = PRODUCTS.filter(function (p) { return p.category === cat && p.photo; })[0];
+      var x = PRODUCTS.filter(function (p) { return hasCategory(p, cat) && p.photo; })[0];
       return x ? x.photo : null;
     }
     var bandLow = inr(Math.min.apply(null, BANDS.map(function (b) { return b.pricePerKg; })));
     var hampLow = inr(Math.min.apply(null, HAMPERS.map(function (h) { return h.price; })));
     var hampHi  = inr(Math.max.apply(null, HAMPERS.map(function (h) { return h.price; })));
     host.innerHTML = [
-      { label:'Assortment Boxes', note:'from ' + bandLow + '/kg', href:'assortments.html', photo:shot('dryfruit') },
+      { label:'Assortment Boxes', note:'from ' + bandLow + '/kg', href:'assortments.html', photo:'box-green' },
       { label:'Dry Fruit Sweets', note:low('dryfruit'),  href:'sweets.html', photo:shot('dryfruit') },
       { label:'Milk & Mawa',      note:low('milk-mawa'), href:'sweets.html', photo:shot('milk-mawa') },
       { label:'Milk & Mawa Peda', note:low('peda'),      href:'sweets.html', photo:shot('peda') },
@@ -652,9 +661,9 @@
     var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     /* which blocks reveal, and how */
-    [['.sec > .wrap > *', 'up'], ['.pgrid', 'rise'], ['.cats', 'up'], ['[data-bands]', 'up'],
+    [['.sec > .wrap > *:not(#catalogue)', 'up'], ['.pgrid', 'rise'], ['.cats', 'up'], ['[data-bands]', 'up'],
      ['[data-hampers]', 'up'], ['[data-boxes]', 'up'], ['.trustbar', 'zoom'], ['.promo', 'up'],
-     ['.rowhead', 'left'], ['.ladder', 'right'], ['#catalogue', 'up'], ['.fresh', 'up']
+     ['.rowhead', 'left'], ['.ladder', 'right'], ['.fresh', 'up']
     ].forEach(function (pair) {
       $$(pair[0]).forEach(function (el) {
         if (!el.hasAttribute('data-reveal')) { el.setAttribute('data-reveal', pair[1]); }
@@ -663,6 +672,12 @@
     $$('.pgrid, .cats, .trustbar, [data-hampers], [data-boxes]').forEach(function (el) {
       el.setAttribute('data-stagger', '');
     });
+
+    var cHost = $('#catalogue');
+    if (cHost) {
+      cHost.removeAttribute('data-reveal');
+      cHost.classList.add('in');
+    }
 
     var targets = $$('[data-reveal], [data-stagger]');
     if (reduce || !('IntersectionObserver' in window)) {
@@ -675,7 +690,7 @@
       entries.forEach(function (e) {
         if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
       });
-    }, {rootMargin: '0px 0px -8% 0px', threshold: 0.06});
+    }, {rootMargin: '0px 0px 50px 0px', threshold: 0.01});
     targets.forEach(function (el) { io.observe(el); });
 
     /* anything rendered by JS after this point still needs observing */
