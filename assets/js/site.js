@@ -64,7 +64,8 @@
       '<source type="image/webp" sizes="' + s + '" srcset="assets/img/' + slug + '-400.webp 400w, assets/img/' + slug + '-800.webp 800w">' +
       '<img src="assets/img/' + slug + '-400.jpg" sizes="' + s + '" srcset="assets/img/' + slug + '-400.jpg 400w, assets/img/' + slug + '-800.jpg 800w" ' +
       'width="400" height="300" loading="' + (eager ? 'eager' : 'lazy') + '" ' +
-      (imgSeen === 1 ? 'fetchpriority="high" ' : '') + 'decoding="async" alt="' + esc(alt) + '">' +
+      (imgSeen === 1 ? 'fetchpriority="high" ' : '') + 'decoding="async" alt="' + esc(alt) + '" ' +
+      'onerror="this.onerror=null;this.removeAttribute(\'srcset\');this.src=\'assets/img/' + slug + '-400.jpg\'">' +
       '</picture>';
   }
 
