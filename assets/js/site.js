@@ -78,13 +78,15 @@
 
   /* ── STOREFRONT PRODUCT CARD (square photo, weight, price, order) ──────── */
   function pcard(p) {
-    var wt = p.unit === 'piece' ? 'Sold by the piece'
-           : (p.weightOptions && p.weightOptions.length ? p.weightOptions.join(' · ') : 'Per kg');
+    var wt = p.unit === 'box' ? 'Special Pooja Box (21 pcs)'
+           : (p.unit === 'piece' ? 'Sold by the piece'
+           : (p.weightOptions && p.weightOptions.length ? p.weightOptions.join(' · ') : 'Per kg'));
     var price, sub;
     if (p.pricePerKg == null) {
       price = '<span class="ph-note">[[price]]</span>'; sub = 'Ask on WhatsApp';
     } else {
-      price = inr(p.pricePerKg); sub = p.unit === 'piece' ? 'per piece' : 'per kg';
+      price = inr(p.pricePerKg);
+      sub = p.unit === 'box' ? 'per box' : (p.unit === 'piece' ? 'per piece' : 'per kg');
       if (p.verify) { sub += ' · [[verify]]'; }
     }
     var flag = p.flag ? '<span class="ribbonflag' + (p.flag === 'Signature' ? ' hot' : '') + '">' +
@@ -127,7 +129,7 @@
               '<span class="u">' + esc(p.priceNote || 'Ask us on WhatsApp') + '</span></div>';
     } else {
       price = '<div class="price">' + inr(p.pricePerKg) +
-              '<span class="u">' + (p.unit === 'piece' ? 'per piece' + (p.verify ? ' · [[verify]]' : '') : 'per kg') + '</span></div>';
+              '<span class="u">' + (p.unit === 'box' ? 'per box' : (p.unit === 'piece' ? 'per piece' + (p.verify ? ' · [[verify]]' : '') : 'per kg')) + '</span></div>';
       if (p.verify) { price = price.replace('[[verify]]', '<span class="ph-note">[[verify]]</span>'); }
     }
     var catStr = p.categories ? p.categories.join(' ') : p.category;
@@ -232,14 +234,16 @@
     var bandLow = inr(Math.min.apply(null, BANDS.map(function (b) { return b.pricePerKg; })));
     var hampLow = inr(Math.min.apply(null, HAMPERS.map(function (h) { return h.price; })));
     var hampHi  = inr(Math.max.apply(null, HAMPERS.map(function (h) { return h.price; })));
-    host.innerHTML = [
+    var tiles = [
+      { label:'Modak & Prasad',   note:'from ₹450 / box', href:'ganpati.html', photo:'modak-box-21' },
       { label:'Assortment Boxes', note:'from ' + bandLow + '/kg', href:'assortments.html', photo:'box-green' },
       { label:'Dry Fruit Sweets', note:low('dryfruit'),  href:'sweets.html', photo:shot('dryfruit') },
       { label:'Milk & Mawa',      note:low('milk-mawa'), href:'sweets.html', photo:shot('milk-mawa') },
       { label:'Milk & Mawa Peda', note:low('peda'),      href:'sweets.html', photo:shot('peda') },
-      { label:'Gift Hampers',     note:hampLow + '–' + hampHi, href:'boxes.html', photo:shot('chocolate') },
+      { label:'Gift Hampers',     note:hampLow + '–' + hampHi, href:'boxes.html', photo:'box-white' },
       { label:'Bengali Sweets',   note:low('bengali'),   href:'sweets.html', photo:shot('bengali') }
-    ].map(catTile).join('');
+    ];
+    host.innerHTML = tiles.map(catTile).join('');
   }
 
   function renderRow(id, ids) {
@@ -251,10 +255,11 @@
 
   function renderBest() {
     var host = $('#bestsellers'); if (!host) { return; }
-    /* Signature sweets lead, in menu order; everything else follows behind them. */
+    /* Ganpati Specials and Signature sweets lead, in menu order; everything else follows behind them. */
+    var fest = PRODUCTS.filter(function (p) { return p.flag === 'Ganpati Special' || p.flag === 'Bestseller'; });
     var sig  = PRODUCTS.filter(function (p) { return p.flag === 'Signature'; });
-    var rest = PRODUCTS.filter(function (p) { return p.flag !== 'Signature'; });
-    host.innerHTML = sig.concat(rest).map(pcard).join('');
+    var rest = PRODUCTS.filter(function (p) { return p.flag !== 'Signature' && p.flag !== 'Ganpati Special' && p.flag !== 'Bestseller'; });
+    host.innerHTML = fest.concat(sig).concat(rest).map(pcard).join('');
     host.setAttribute('data-stagger', '');
   }
   function renderFaq() {
@@ -554,7 +559,7 @@
   function season() {
     var target = new Date(SEASON.festivalDate).getTime();
     var passed = Date.now() > target;
-    var on = SEASON.rakhiLive && !passed;
+    var on = (SEASON.ganpatiLive || SEASON.rakhiLive) && !passed;
 
     var banner = $('#season-banner');
     if (banner) {
@@ -570,8 +575,8 @@
     var cd = $('#countdown');
     if (cd) {
       if (passed) {
-        cd.outerHTML = '<p class="desc" style="margin-top:16px">Rakshabandhan ' + esc(SEASON.festivalLabel) +
-          ' has passed. We make hampers and gift boxes all year — message us and we will put one together.</p>';
+        cd.outerHTML = '<p class="desc" style="margin-top:16px">Ganesh Chaturthi ' + esc(SEASON.festivalLabel) +
+          ' has passed. We prepare fresh modaks, gift hampers and prasad boxes all year — message us on WhatsApp and we will put one together.</p>';
         return;
       }
       var tick = function () {
