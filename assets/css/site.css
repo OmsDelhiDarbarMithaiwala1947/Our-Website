@@ -463,10 +463,12 @@ p{margin:0 0 1em}
   text-decoration:none;cursor:pointer}
 .pcard .padd svg{width:16px;height:16px}
 .pcard .padd:hover{background:var(--crimson-d)}
-.ribbonflag{position:absolute;left:0;top:11px;z-index:3;background:var(--gold);color:#3A2318;
-  font-family:'Oswald',sans-serif;font-size:10.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;
-  padding:5px 11px;border-radius:0 7px 7px 0}
-.ribbonflag.hot{background:var(--crimson);color:#fff}
+.ribbonflag, .flag, .pcard .flag, .card .flag{position:absolute;left:0;top:11px;z-index:3;
+  background:var(--maroon, #5E1526);color:#FFFFFF!important;
+  font-family:'Oswald',sans-serif;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
+  padding:5px 12px;border-radius:0 7px 7px 0;box-shadow:0 2px 6px rgba(0,0,0,0.3);
+  text-shadow:0 1px 2px rgba(0,0,0,0.4)}
+.ribbonflag.hot, .flag.hot{background:var(--crimson, #C4123F);color:#FFFFFF!important}
 
 /* ---------- ROW HEADER with "view all" ---------- */
 .rowhead{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:16px;flex-wrap:wrap}
@@ -606,7 +608,7 @@ h2,h3{font-weight:700}
 .banner .bin{background:linear-gradient(90deg,rgba(94,21,38,.90),rgba(94,21,38,.55) 62%,rgba(94,21,38,0))}
 .announce{background:var(--maroon);color:#F3DFC0}
 .season{background:var(--cream-2);border-bottom:1px solid rgba(184,137,43,.42)}
-.ribbonflag{background:var(--maroon)}
+.ribbonflag, .flag{background:var(--maroon);color:#ffffff!important}
 .trustbar{background:var(--cream-2)}
 footer,.sitefoot{background:var(--maroon);color:#F3DFC0}
 .noimg{background:var(--cream-2) url(../img/lattice.svg) repeat;background-size:34px 34px}
